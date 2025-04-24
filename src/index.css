@@ -1,0 +1,55 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+
+@theme{
+  --font-montserrat: 'Montserrat', sans-serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+  }
+  /* Remove spinner buttons from number inputs globally */
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+}
+
+
+@layer components {
+  .container {
+    @apply w-full mx-auto max-w-[1400px] px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32;
+  }
+
+  .container-sm {
+    @apply w-full mx-auto max-w-3xl px-4 sm:px-6 md:px-8;
+  }
+
+  .container-md {
+    @apply w-full mx-auto max-w-5xl px-4 sm:px-6 md:px-8 lg:px-16;
+  }
+
+  .container-lg {
+    @apply w-full mx-auto max-w-7xl px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32;
+  }
+
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
+  
+}
