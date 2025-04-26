@@ -305,7 +305,6 @@ export const PDFPreview: React.FC<PDFPreviewProps> = ({
     <div
       className=" fixed inset-0 bg-black/70 backdrop-blur-sm z-[9999] flex items-center justify-center p-4"
       onClick={(e) => {
-        // Close when clicking the backdrop
         if (e.target === e.currentTarget) {
           onClose();
         }

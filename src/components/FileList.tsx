@@ -12,16 +12,11 @@ interface FileItemProps {
   onPreviewFile?: (file: File) => void; // Make callback optional
 }
 
-// Optimize FileItem with memo and better event handlers
 export const FileItem: React.FC<FileItemProps> = memo(
   ({ file, onRemove, viewMode, isPasswordProtected, onPreviewFile }) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
-
-    // Use the custom hook to get file details
     const { icon, fileExtension, fileSize, modifiedDate, canPreview } = useFileDetails(file);
-
-    // Optimize handlers with useCallback
     const handlePreviewClick = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -46,7 +41,6 @@ export const FileItem: React.FC<FileItemProps> = memo(
       setShowConfirmDialog(false);
     }, []);
 
-    // Memoize hover handlers to prevent recreating functions on each render
     const handleMouseEnter = useCallback(() => {
       setIsHovered(true);
     }, []);
@@ -87,12 +81,12 @@ export const FileItem: React.FC<FileItemProps> = memo(
             <div className="flex-shrink-0 flex items-center space-x-2">
               {canPreview && (
                 <Button
-                  variant="secondary"
+                  variant="icon"
                   size="small"
                   onClick={handlePreviewClick}
-                  className={`transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}
+                  className={`text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 ${!isHovered && !canPreview ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
                 >
-                  <FiEye className="mr-1" /> Preview
+                  <FiEye className="mr-1 h-5 w-5" />
                 </Button>
               )}
 
@@ -136,7 +130,7 @@ export const FileItem: React.FC<FileItemProps> = memo(
         >
           {/* File type badge at top right */}
           <div className="absolute top-2 right-2 z-10">
-            <span className="text-xs font-mono px-2 py-1 rounded-full font-medium bg-zinc-200 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-300">
+            <span className="text-xs font-mono px-2 py-1 rounded-sm font-medium bg-zinc-200 dark:bg-zinc-600 text-zinc-700 dark:text-zinc-300">
               {fileExtension}
             </span>
           </div>
@@ -244,7 +238,6 @@ export const FileList: React.FC<FileListProps> = ({
   getIsPasswordProtected = () => false,
   onPreviewFile,
 }) => {
-  // Replace useState with useMemo for better performance
   const sortedFiles = useMemo(() => {
     return [...files].sort((a, b) => {
       if (sortBy === 'name') {
@@ -254,17 +247,14 @@ export const FileList: React.FC<FileListProps> = ({
       } else if (sortBy === 'size') {
         return sortDirection === 'asc' ? a.size - b.size : b.size - a.size;
       } else if (sortBy === 'date') {
-        // Properly sort by date using lastModified property
         return sortDirection === 'asc'
           ? a.lastModified - b.lastModified
           : b.lastModified - a.lastModified;
       }
-      // Default sort by name
       return a.name.localeCompare(b.name);
     });
   }, [files, sortBy, sortDirection]);
 
-  // Render empty state
   if (files.length === 0) {
     return (
       <div className="py-8 text-center bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border-2 border-dashed border-zinc-200 dark:border-zinc-700">

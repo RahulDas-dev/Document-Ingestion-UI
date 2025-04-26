@@ -37,7 +37,9 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = memo(
               {title}
             </h3>
           )}
-          <div className="font-mono text-zinc-600 dark:text-zinc-400 mb-6">{description}</div>
+          <div className="font-mono text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+            {description}
+          </div>
           <div className="flex justify-end space-x-3">
             <Button variant="secondary" size="small" onClick={onCancel}>
               {cancelText}

@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, memo } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { FileUpload } from './FileUpload';
 import { FileList } from './FileList';
 import { Button } from './ui/Button';
@@ -13,7 +13,6 @@ import {
   FiChevronDown,
   FiArrowUp,
   FiArrowDown,
-  FiSearch,
 } from 'react-icons/fi';
 import { AppConfig } from '../config/AppConfig';
 
@@ -28,14 +27,11 @@ interface FileObject {
 interface DocumentHeaderProps {
   viewMode: 'grid' | 'list';
   toggleViewMode: (mode: 'grid' | 'list') => void;
-  handleClearAll: () => void;
   toggleSortDirection: () => void;
   setSortBy: (sortBy: 'name' | 'size' | 'date') => void;
   sortBy: 'name' | 'size' | 'date';
   sortDirection: 'asc' | 'desc';
   hasFiles: boolean;
-  toggleFilter: () => void;
-  showFilter: boolean;
 }
 
 // Memoize the DocumentHeader to prevent unnecessary re-renders
@@ -43,18 +39,15 @@ const DocumentHeader = memo(
   ({
     viewMode,
     toggleViewMode,
-    handleClearAll,
     toggleSortDirection,
     setSortBy,
     sortBy,
     sortDirection,
     hasFiles,
-    toggleFilter,
-    showFilter,
   }: DocumentHeaderProps) => (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-      <h2 className="text-xl font-montserrat font-semibold text-zinc-800 dark:text-zinc-100">
-        Document Files
+      <h2 className="text-base font-montserrat font-medium text-zinc-800 dark:text-zinc-100">
+        Documents
       </h2>
 
       {hasFiles && (
@@ -83,17 +76,6 @@ const DocumentHeader = memo(
             </Button>
           </div>
 
-          {/* Search/Filter toggle button */}
-          <Button
-            variant={showFilter ? 'primary' : 'secondary'}
-            size="small"
-            onClick={toggleFilter}
-            className="flex items-center"
-          >
-            <FiSearch className="mr-1" />
-            Filter
-          </Button>
-
           {/* Sort options dropdown */}
           <div className="relative inline-block group">
             <Button
@@ -103,7 +85,7 @@ const DocumentHeader = memo(
               onClick={toggleSortDirection}
             >
               <FiFilter className="mr-1" />
-              <span className="mr-1">Sort by</span>
+              <span className="mr-1">Sort</span>
               <FiChevronDown className="h-3 w-3" />
               {sortDirection === 'asc' ? (
                 <FiArrowUp className="ml-1 h-3 w-3" />
@@ -111,7 +93,7 @@ const DocumentHeader = memo(
                 <FiArrowDown className="ml-1 h-3 w-3" />
               )}
             </Button>
-            <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-zinc-800 rounded-md shadow-lg border border-zinc-200 dark:border-zinc-700 divide-y divide-zinc-100 dark:divide-zinc-700 z-10 hidden group-hover:block">
+            <div className="absolute right-0 mt-1 w-40 bg-white dark:bg-zinc-800 rounded-md shadow-lg border border-zinc-200 dark:border-zinc-700 divide-y divide-zinc-100 dark:divide-zinc-700 z-15 hidden group-hover:block">
               <button
                 className={`block px-4 py-2 text-sm w-full text-left ${
                   sortBy === 'name'
@@ -144,11 +126,6 @@ const DocumentHeader = memo(
               </button>
             </div>
           </div>
-
-          {/* Clear all button */}
-          <Button variant="secondary" size="small" onClick={handleClearAll}>
-            <FiX className="mr-1" /> Clear All
-          </Button>
         </div>
       )}
     </div>
@@ -159,8 +136,6 @@ export const DocumentUpload = () => {
   const [filesObjects, setFilesObjects] = useState<FileObject[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [filterQuery, setFilterQuery] = useState('');
-  const [showFilter, setShowFilter] = useState(false);
   const [sortBy, setSortBy] = useState<'name' | 'size' | 'date'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [showClearAllDialog, setShowClearAllDialog] = useState(false);
@@ -173,7 +148,6 @@ export const DocumentUpload = () => {
       const filesToAdd: FileObject[] = [];
 
       newFiles.forEach((newFile) => {
-        // Check if a file with the same name and size already exists
         const isDuplicate = filesObjects.some(
           (existingFileObj) =>
             existingFileObj.file.name === newFile.name && existingFileObj.file.size === newFile.size
@@ -187,7 +161,6 @@ export const DocumentUpload = () => {
         }
       });
 
-      // Show toast notification for duplicates
       if (duplicates.length > 0) {
         if (duplicates.length === 1) {
           window.showToast?.warning(`"${duplicates[0]}" has already been added.`);
@@ -195,8 +168,6 @@ export const DocumentUpload = () => {
           window.showToast?.warning(`${duplicates.length} duplicate files were not added.`);
         }
       }
-
-      // Only add non-duplicate files
       if (filesToAdd.length > 0) {
         setFilesObjects((prevFilesObjects) => [...prevFilesObjects, ...filesToAdd]);
       }
@@ -217,7 +188,6 @@ export const DocumentUpload = () => {
 
   const confirmClearAll = useCallback(() => {
     setFilesObjects([]);
-    setFilterQuery('');
     setShowClearAllDialog(false);
   }, []);
 
@@ -238,7 +208,6 @@ export const DocumentUpload = () => {
     });
   }, []);
 
-  // Get the password for a file if available
   const getFilePassword = useCallback(
     (file: File): string | undefined => {
       const fileObj = filesObjects.find((obj) => obj.file === file);
@@ -247,12 +216,10 @@ export const DocumentUpload = () => {
     [filesObjects]
   );
 
-  // Handle preview for a file
   const handlePreviewFile = useCallback((file: File) => {
     setPreviewFile(file);
   }, []);
 
-  // Close preview
   const handleClosePreview = useCallback(() => {
     setPreviewFile(null);
   }, []);
@@ -292,22 +259,6 @@ export const DocumentUpload = () => {
     }, 2000);
   };
 
-  // Memoize filtered files to avoid recalculation on every render
-  const filteredFilesObjects = useMemo(() => {
-    return filterQuery
-      ? filesObjects.filter((fileObj) =>
-          fileObj.file.name.toLowerCase().includes(filterQuery.toLowerCase())
-        )
-      : filesObjects;
-  }, [filesObjects, filterQuery]);
-
-  // Memoize filtered files (just the File objects)
-  const filteredFiles = useMemo(
-    () => filteredFilesObjects.map((fileObj) => fileObj.file),
-    [filteredFilesObjects]
-  );
-
-  // Check if a file is password protected
   const isFilePasswordProtected = useCallback(
     (file: File) => {
       const fileObj = filesObjects.find((obj) => obj.file === file);
@@ -317,105 +268,82 @@ export const DocumentUpload = () => {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-sm">
-      <FileUpload
-        onFilesSelected={handleFilesSelected}
-        maxFileSize={AppConfig.MAX_UPLOAD_SIZE}
-        acceptedFileTypes={AppConfig.ACCEPTED_FILE_TYPES}
-      />
-
-      {filesObjects.length > 0 && (
-        <>
-          <DocumentHeader
-            viewMode={viewMode}
-            toggleViewMode={setViewMode}
-            handleClearAll={handleClearAll}
-            toggleSortDirection={() =>
-              setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
-            }
-            setSortBy={setSortBy}
-            sortBy={sortBy}
-            sortDirection={sortDirection}
-            hasFiles={filesObjects.length > 0}
-            toggleFilter={() => setShowFilter((prev) => !prev)}
-            showFilter={showFilter}
-          />
-
-          {showFilter && (
-            <div className="mb-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Filter files by name..."
-                  value={filterQuery}
-                  onChange={(e) => setFilterQuery(e.target.value)}
-                  className="w-full px-4 py-2 rounded border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-zinc-500"
-                />
-                {filterQuery && (
-                  <button
-                    onClick={() => setFilterQuery('')}
-                    className="absolute right-2 top-1/2 transform -translate-y-1/2 text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300"
-                  >
-                    <FiX className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Using a more adaptive container for the file list */}
-          <div className="pr-1">
-            <FileList
-              files={filteredFiles}
-              onRemoveFile={handleRemoveFile}
+    <>
+      <br />
+      <br />
+      <br />
+      <div className="w-full max-w-5xl mx-auto p-6 bg-white dark:bg-zinc-900 rounded-lg shadow-sm">
+        <FileUpload
+          onFilesSelected={handleFilesSelected}
+          maxFileSize={AppConfig.MAX_UPLOAD_SIZE}
+          acceptedFileTypes={AppConfig.ACCEPTED_FILE_TYPES}
+        />
+        {filesObjects.length > 0 && (
+          <>
+            <br />
+            <DocumentHeader
               viewMode={viewMode}
+              toggleViewMode={setViewMode}
+              toggleSortDirection={() =>
+                setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+              }
+              setSortBy={setSortBy}
               sortBy={sortBy}
               sortDirection={sortDirection}
-              getIsPasswordProtected={isFilePasswordProtected}
-              onPreviewFile={handlePreviewFile}
+              hasFiles={filesObjects.length > 0}
             />
-          </div>
 
-          <div className="mt-6 flex justify-between items-center border-t border-zinc-200 dark:border-zinc-700 pt-4">
-            <Button
-              variant="primary"
-              size="small"
-              onClick={handleSubmit}
-              disabled={isUploading || filesObjects.length === 0}
-              className="min-w-[120px]"
-            >
-              {isUploading ? (
-                <div className="flex items-center">
-                  <FiLoader className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                  Uploading...
-                </div>
-              ) : (
-                'Upload Files'
-              )}
-            </Button>
-          </div>
+            <div className="pr-1">
+              <FileList
+                files={filesObjects.map((fileObj) => fileObj.file)}
+                onRemoveFile={handleRemoveFile}
+                viewMode={viewMode}
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                getIsPasswordProtected={isFilePasswordProtected}
+                onPreviewFile={handlePreviewFile}
+              />
+            </div>
 
-          {/* Confirmation dialog for clearing all files */}
-          <ConfirmDialog
-            isOpen={showClearAllDialog}
-            onConfirm={confirmClearAll}
-            onCancel={cancelClearAll}
-            title="Clear All Files"
-            description="Are you sure you want to clear all files? This action cannot be undone."
-          />
-        </>
-      )}
+            <div className="mt-6 flex justify-end items-center border-t border-zinc-200 dark:border-zinc-700 pt-4">
+              <Button
+                variant="primary"
+                size="small"
+                onClick={handleSubmit}
+                disabled={isUploading || filesObjects.length === 0}
+                className="min-w-[120px] mr-5"
+              >
+                {isUploading ? (
+                  <div className="flex items-center">
+                    <FiLoader className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
+                    Uploading...
+                  </div>
+                ) : (
+                  'Upload Files'
+                )}
+              </Button>
+              <Button variant="secondary" size="small" onClick={handleClearAll}>
+                <FiX className="mr-1" /> Clear All
+              </Button>
+            </div>
+            <ConfirmDialog
+              isOpen={showClearAllDialog}
+              onConfirm={confirmClearAll}
+              onCancel={cancelClearAll}
+              title="Clear All Files"
+              description="Are you sure you want to clear all files? "
+            />
+          </>
+        )}
 
-      {/* PDF Preview with password handling */}
-      {previewFile && (
         <PDFPreview
           file={previewFile}
           onClose={handleClosePreview}
-          isPasswordProtected={isFilePasswordProtected(previewFile)}
-          savedPassword={getFilePassword(previewFile)}
-          onPasswordSaved={(password) => saveFilePassword(previewFile, password)}
+          isPasswordProtected={previewFile ? isFilePasswordProtected(previewFile) : false}
+          savedPassword={previewFile ? getFilePassword(previewFile) : undefined}
+          onPasswordSaved={(password) => previewFile && saveFilePassword(previewFile, password)}
         />
-      )}
-    </div>
+      </div>
+    </>
   );
 };
