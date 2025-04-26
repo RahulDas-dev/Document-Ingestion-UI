@@ -1,10 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
-@import "tailwindcss";
+@import 'tailwindcss';
 @custom-variant dark (&:where(.dark, .dark *));
 
-
-@theme{
+@theme {
   --font-montserrat: 'Montserrat', sans-serif;
 }
 
@@ -12,18 +11,60 @@
   :root {
     color-scheme: light dark;
   }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
   /* Remove spinner buttons from number inputs globally */
-  input[type=number]::-webkit-outer-spin-button,
-  input[type=number]::-webkit-inner-spin-button {
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
   }
-  
-  input[type=number] {
+
+  input[type='number'] {
     -moz-appearance: textfield;
   }
 }
 
+/* Custom scrollbar styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #f4f4f5; /* zinc-100 */
+}
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background-color: #27272a; /* zinc-800 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #d4d4d8; /* zinc-300 */
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #a1a1aa; /* zinc-400 */
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #52525b; /* zinc-600 */
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #71717a; /* zinc-500 */
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 #f4f4f5; /* zinc-300 zinc-100 */
+}
+.dark .custom-scrollbar {
+  scrollbar-color: #52525b #27272a; /* zinc-600 zinc-800 */
+}
 
 @layer components {
   .container {
@@ -47,9 +88,97 @@
     -webkit-appearance: none;
     margin: 0;
   }
-  
+
   .no-spinner {
     -moz-appearance: textfield;
   }
-  
+
+  /* Button Styles */
+  .btn {
+    @apply rounded transition duration-200 ease-in-out flex items-center justify-center gap-2 font-mono text-xs cursor-pointer;
+  }
+
+  .btn-primary {
+    @apply bg-zinc-900 text-white hover:bg-black dark:bg-zinc-800 dark:hover:bg-zinc-700 
+      disabled:bg-zinc-300 dark:disabled:bg-zinc-700 disabled:cursor-not-allowed;
+  }
+
+  .btn-success {
+    @apply bg-zinc-800 text-white hover:bg-black dark:bg-black dark:hover:bg-zinc-900 
+      disabled:bg-zinc-400 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed;
+  }
+
+  .btn-icon {
+    @apply bg-transparent text-zinc-500 dark:text-zinc-400 dark:hover:text-zinc-300 
+      disabled:bg-transparent disabled:text-zinc-400;
+  }
+
+  .btn-secondary {
+    @apply bg-zinc-200 text-zinc-700 hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600
+      disabled:bg-zinc-100 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply bg-zinc-700 text-white hover:bg-zinc-800 dark:bg-zinc-900 dark:hover:bg-black
+      disabled:bg-zinc-400 dark:disabled:bg-zinc-800 disabled:cursor-not-allowed;
+  }
+
+  .btn-small {
+    @apply px-3 py-1.5;
+  }
+
+  .btn-normal {
+    @apply w-full px-4 py-2;
+  }
+
+  /* Tooltip Styles */
+  .tooltip {
+    @apply relative inline-block;
+  }
+
+  .tooltip:before {
+    @apply content-[attr(data-tooltip)] absolute z-10 px-2 py-1 text-xs font-medium text-white bg-zinc-800 dark:bg-zinc-700 rounded shadow-sm opacity-0 invisible transition-opacity duration-200;
+  }
+
+  .tooltip:after {
+    @apply content-[''] absolute border-[5px] border-solid opacity-0 invisible transition-opacity duration-200;
+  }
+
+  .tooltip:hover:before,
+  .tooltip:hover:after {
+    @apply opacity-100 visible;
+  }
+
+  /* Tooltip positions */
+  .tooltip-top:before {
+    @apply bottom-[calc(100%+5px)] left-1/2 -translate-x-1/2;
+  }
+
+  .tooltip-top:after {
+    @apply bottom-full left-1/2 -translate-x-1/2 border-t-zinc-800 dark:border-t-zinc-700 border-r-transparent border-l-transparent border-b-transparent;
+  }
+
+  .tooltip-bottom:before {
+    @apply top-[calc(100%+5px)] left-1/2 -translate-x-1/2;
+  }
+
+  .tooltip-bottom:after {
+    @apply top-full left-1/2 -translate-x-1/2 border-b-zinc-800 dark:border-b-zinc-700 border-r-transparent border-l-transparent border-t-transparent;
+  }
+
+  .tooltip-left:before {
+    @apply right-[calc(100%+5px)] top-1/2 -translate-y-1/2;
+  }
+
+  .tooltip-left:after {
+    @apply right-full top-1/2 -translate-y-1/2 border-l-zinc-800 dark:border-l-zinc-700 border-t-transparent border-b-transparent border-r-transparent;
+  }
+
+  .tooltip-right:before {
+    @apply left-[calc(100%+5px)] top-1/2 -translate-y-1/2;
+  }
+
+  .tooltip-right:after {
+    @apply left-full top-1/2 -translate-y-1/2 border-r-zinc-800 dark:border-r-zinc-700 border-t-transparent border-b-transparent border-l-transparent;
+  }
 }

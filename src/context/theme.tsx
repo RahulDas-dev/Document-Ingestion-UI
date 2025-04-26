@@ -1,33 +1,5 @@
-import { createContext } from 'react';
-
 import { useEffect, useState, ReactNode, useCallback } from 'react';
-
-export interface ThemeContextType {
-    isDark: boolean;
-    toggleTheme: () => void;
-}
-
-// Provide default values to avoid undefined context
-export const ThemeContext = createContext<ThemeContextType>({
-    isDark: false,
-    toggleTheme: () => { },
-});
-
-
-// Apply initial theme before React hydration
-const getInitialTheme = () => {
-  const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const isDark = saved ? saved === 'dark' : prefersDark;
-  
-  // Apply theme immediately
-  if (isDark) {
-    document.documentElement.classList.add('dark');
-  } else {
-    document.documentElement.classList.remove('dark');
-  }
-  return isDark;
-};
+import { getInitialTheme, ThemeContext } from './ThemeContext';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [isDark, setIsDark] = useState(getInitialTheme);
@@ -42,7 +14,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [isDark]);
 
   const toggleTheme = useCallback(() => {
-    setIsDark(prevDark => {
+    setIsDark((prevDark) => {
       const newDark = !prevDark;
       localStorage.setItem('theme', newDark ? 'dark' : 'light');
       return newDark;
@@ -62,9 +34,5 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mediaQuery.removeEventListener('change', handleChange);
   }, []);
 
-  return (
-    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ isDark, toggleTheme }}>{children}</ThemeContext.Provider>;
 }

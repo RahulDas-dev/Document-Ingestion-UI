@@ -1,13 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
-import { ThemeProvider } from './context/theme.tsx'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './utils/PdfWorker.ts';
+import './index.css';
+import App from './App.tsx';
+import { ThemeProvider } from './context/theme.tsx';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
       <App />
     </ThemeProvider>
-  </StrictMode>,
-)
+  </StrictMode>
+);
